@@ -468,7 +468,7 @@ static const OSD_Entry cmsx_menuProfileOtherEntries[] = {
 #ifdef USE_ITERM_RELAX
     { "ITERM_RELAX",         OME_TAB,    NULL, &(OSD_TAB_t) { &cmsx_iterm_relax,        4, osdTableItermRelax}, 0 },
     { "ITERM_RELAX_TYPE",    OME_TAB,    NULL, &(OSD_TAB_t) { &cmsx_iterm_relax_type,   1, osdTableITermRelaxType}, 0 },
-    { "ITERM_RELAX_CUTOFF",  OME_UINT8,  NULL, &(OSD_TAB_t) { &cmsx_iterm_relax_cutoff  1, 100, 1 }, 0 },
+    { "ITERM_RELAX_CUTOFF",  OME_UINT8,  NULL, &(OSD_UINT8_t) { &cmsx_iterm_relax_cutoff  1, 100, 1 }, 0 },
 #endif
 #ifdef USE_LAUNCH_CONTROL
     {"LAUNCH CONTROL", OME_Submenu, cmsMenuChange, &cmsx_menuLaunchControl, 0 },
