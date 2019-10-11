@@ -169,7 +169,7 @@ PG_REGISTER_WITH_RESET_FN(gyroConfig_t, gyroConfig, PG_GYRO_CONFIG, 7);
 #endif
 
 void pgResetFn_gyroConfig(gyroConfig_t *gyroConfig)
-{ 
+{
     gyroConfig->gyroCalibrationDuration = 125;        // 1.25 seconds
     gyroConfig->gyroMovementCalibrationThreshold = 48;
     gyroConfig->gyro_sync_denom = GYRO_SYNC_DENOM_DEFAULT;
@@ -180,7 +180,7 @@ void pgResetFn_gyroConfig(gyroConfig_t *gyroConfig)
                                         // value to 0 otherwise Configurator versions 10.4 and earlier will also
                                         // reset the lowpass filter type to PT1 overriding the desired BIQUAD setting.
     gyroConfig->gyro_lowpass2_type = FILTER_PT1;
-    gyroConfig->gyro_lowpass2_hz = 250;
+    gyroConfig->gyro_lowpass2_hz = GYRO_LOWPASS_2_HZ_DEFAULT;
     gyroConfig->gyro_high_fsr = false;
     gyroConfig->gyro_to_use = GYRO_CONFIG_USE_GYRO_DEFAULT;
     gyroConfig->gyro_soft_notch_hz_1 = 0;
@@ -191,13 +191,15 @@ void pgResetFn_gyroConfig(gyroConfig_t *gyroConfig)
     gyroConfig->gyro_offset_yaw = 0;
     gyroConfig->yaw_spin_recovery = true;
     gyroConfig->yaw_spin_threshold = 1950;
-    gyroConfig->dyn_lpf_gyro_min_hz = 200;
-    gyroConfig->dyn_lpf_gyro_max_hz = 500;
+    gyroConfig->dyn_lpf_gyro_min_hz = DYN_LPF_GYRO_MIN_HZ_DEFAULT;
+    gyroConfig->dyn_lpf_gyro_max_hz = DYN_LPF_GYRO_MAX_HZ_DEFAULT;
     gyroConfig->dyn_notch_range = DYN_NOTCH_RANGE_MEDIUM;
     gyroConfig->dyn_notch_width_percent = 8;
     gyroConfig->dyn_notch_q = 120;
     gyroConfig->dyn_notch_min_hz = 150;
     gyroConfig->gyro_filter_debug_axis = FD_ROLL;
+    gyroConfig->slider_gyro_filter = true;
+    gyroConfig->slider_gyro_filter_multiplier = 100;
 }
 
 #ifdef USE_MULTI_GYRO
@@ -594,7 +596,7 @@ static void dynLpfFilterInit()
         default:
             dynLpfFilter = DYN_LPF_NONE;
             break;
-        } 
+        }
     } else {
         dynLpfFilter = DYN_LPF_NONE;
     }
@@ -917,7 +919,7 @@ FAST_CODE int32_t gyroSlewLimiter(gyroSensor_t *gyroSensor, int axis)
 #ifdef USE_GYRO_OVERFLOW_CHECK
 static FAST_CODE_NOINLINE void handleOverflow(timeUs_t currentTimeUs)
 {
-    // This will need to be revised if we ever allow different sensor types to be 
+    // This will need to be revised if we ever allow different sensor types to be
     // used simultaneously. In that case the scale might be different between sensors.
     // It's complicated by the fact that we're using filtered gyro data here which is
     // after both sensors are scaled and averaged.
@@ -950,7 +952,7 @@ static FAST_CODE void checkForOverflow(timeUs_t currentTimeUs)
         // check for overflow in the axes set in overflowAxisMask
         gyroOverflow_e overflowCheck = GYRO_OVERFLOW_NONE;
 
-        // This will need to be revised if we ever allow different sensor types to be 
+        // This will need to be revised if we ever allow different sensor types to be
         // used simultaneously. In that case the scale might be different between sensors.
         // It's complicated by the fact that we're using filtered gyro data here which is
         // after both sensors are scaled and averaged.

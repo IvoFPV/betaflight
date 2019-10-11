@@ -47,6 +47,7 @@
 #include "config/config.h"
 #include "config/config_eeprom.h"
 #include "config/feature.h"
+#include "config/tuning_sliders.h"
 
 #include "drivers/accgyro/accgyro.h"
 #include "drivers/bus_i2c.h"
@@ -1977,6 +1978,28 @@ static mspResult_e mspFcProcessOutCommandWithArg(mspDescriptor_t srcDesc, uint8_
         break;
 #endif // USE_VTX_TABLE
 
+#ifdef USE_TUNING_SLIDERS
+    // Added in MSP API 1.43
+    case MSP_TUNING_SLIDERS:
+        {
+            sbufWriteU8(dst, currentPidProfile->slider_pids_mode);
+            sbufWriteU8(dst, currentPidProfile->slider_master_multiplier);
+            sbufWriteU8(dst, currentPidProfile->slider_roll_pitch_ratio);
+            sbufWriteU8(dst, currentPidProfile->slider_i_gain);
+            sbufWriteU8(dst, currentPidProfile->slider_pd_ratio);
+            sbufWriteU8(dst, currentPidProfile->slider_pd_gain);
+            sbufWriteU8(dst, currentPidProfile->slider_dmin_ratio);
+            sbufWriteU8(dst, currentPidProfile->slider_ff_gain);
+
+            sbufWriteU8(dst, currentPidProfile->slider_dterm_filter);
+            sbufWriteU8(dst, currentPidProfile->slider_dterm_filter_multiplier);
+
+            sbufWriteU8(dst, gyroConfig()->slider_gyro_filter);
+            sbufWriteU8(dst, gyroConfig()->slider_gyro_filter_multiplier);
+        }
+        break;
+#endif
+
     case MSP_RESET_CONF:
         {
 #if defined(USE_CUSTOM_DEFAULTS)
@@ -2353,7 +2376,7 @@ static mspResult_e mspProcessInCommand(mspDescriptor_t srcDesc, uint8_t cmdMSP, 
     case MSP_SET_RESET_CURR_PID:
         resetPidProfile(currentPidProfile);
         break;
-        
+
     case MSP_SET_SENSOR_ALIGNMENT: {
         // maintain backwards compatibility for API < 1.41
         const uint8_t gyroAlignment = sbufReadU8(src);
@@ -2823,6 +2846,30 @@ static mspResult_e mspProcessInCommand(mspDescriptor_t srcDesc, uint8_t cmdMSP, 
             } else {
                 return MSP_RESULT_ERROR;
             }
+        }
+        break;
+#endif
+
+#ifdef USE_TUNING_SLIDERS
+    // Added in MSP API 1.43
+    case MSP_SET_TUNING_SLIDERS:
+        {
+            currentPidProfile->slider_pids_mode = sbufReadU8(src);
+            currentPidProfile->slider_master_multiplier = sbufReadU8(src);
+            currentPidProfile->slider_roll_pitch_ratio = sbufReadU8(src);
+            currentPidProfile->slider_i_gain = sbufReadU8(src);
+            currentPidProfile->slider_pd_ratio = sbufReadU8(src);
+            currentPidProfile->slider_pd_gain = sbufReadU8(src);
+            currentPidProfile->slider_dmin_ratio = sbufReadU8(src);
+            currentPidProfile->slider_ff_gain = sbufReadU8(src);
+
+            currentPidProfile->slider_dterm_filter = sbufReadU8(src);
+            currentPidProfile->slider_dterm_filter_multiplier = sbufReadU8(src);
+
+            gyroConfigMutable()->slider_gyro_filter = sbufReadU8(src);
+            gyroConfigMutable()->slider_gyro_filter_multiplier = sbufReadU8(src);
+
+            applyTuningSliders(currentPidProfile);
         }
         break;
 #endif
